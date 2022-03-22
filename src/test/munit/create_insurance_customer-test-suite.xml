@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="create_insurance_customer-test-suite.xml" />
+	<munit:test name="create_insurance_customer-test-suite-get:\fetch-ins-customer:create_insurance_customer-configTest" doc:id="94acc130-bce2-4dc6-af29-d2f5394875d3" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="04512c1e-e3f6-4981-914b-7b3acb908460" >
+				<munit:payload value="#[readUrl('classpath://common-data\DataBaseInsertInput.dwl')]" />
+				<munit:attributes value="#[readUrl('classpath://common-data\CreateIdDataMob.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\fetch-ins-customer:create_insurance_customer-config" doc:id="dc6e2504-c08e-447b-a753-cff396915439" name="post:\create-ins-customer:application\json:create_insurance_customer-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="10f61bef-b552-469a-9cab-4d34ac20fd08" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="create_insurance_customer-test-suite-post:\create-ins-customer:application\json:create_insurance_customer-configTest" doc:id="40318a85-98e7-45f9-a3cd-882d40863657" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\create-ins-customer:application\json:create_insurance_customer-config" doc:id="8bdf3b03-88a4-4acf-bdbf-8af9ffdd5e31" name="post:\create-ins-customer:application\json:create_insurance_customer-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="create_insurance_customer-test-suite-post:\create-ins-customer:application\json:create_insurance_customer-configTest1" doc:id="cca63817-0e8f-4cb0-b888-800598087a81" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\create-ins-customer:application\json:create_insurance_customer-config" doc:id="3e3089ed-0188-4562-9fe0-fcb5e946634b" name="post:\create-ins-customer:application\json:create_insurance_customer-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="create_insurance_customer-test-suite-post:\create-ins-customer:application\json:create_insurance_customer-configTest2" doc:id="c02f45cf-395d-492e-8e63-89767f3c6ef7" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\create-ins-customer:application\json:create_insurance_customer-config" doc:id="aeb3004e-0172-4eae-8618-27ddf2027604" name="post:\create-ins-customer:application\json:create_insurance_customer-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="create_insurance_customer-test-suite-post:\create-ins-customer:application\json:create_insurance_customer-configTest3" doc:id="bc7462d3-d2f3-4bc3-88d3-832a3ebb4fe1" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\create-ins-customer:application\json:create_insurance_customer-config" doc:id="ad4d7bab-6b8e-4626-8001-2c3341040f4f" name="post:\create-ins-customer:application\json:create_insurance_customer-config"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

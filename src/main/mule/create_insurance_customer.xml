@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+    <http:listener-config name="create_insurance_customer-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="create_insurance_customer-config" api="resource::e46a245b-13e8-4cfc-804f-9be1bd6fa09a:create_insurance_customer:1.0.1:raml:zip:create_insurance_customer.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <file:config name="File_Config" doc:name="File Config" doc:id="3fe13813-e389-4200-b9a2-c8ea764b6a70" >
+		<file:connection />
+	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="aa5ecadd-f907-4cd6-84ea-9d015e06abd9" >
+		<db:oracle-connection host="localhost" user="SYSTEM" password="Nikku@13" instance="XE" />
+	</db:config>
+	<api-gateway:autodiscovery apiId="17707182" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="6c54b954-3346-4cd9-938d-9b0b6e0caa0d" flowRef="create_insurance_customer-main" />
+	<flow name="create_insurance_customer-main">
+        <http:listener config-ref="create_insurance_customer-httpListenerConfig" path="/v1/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="create_insurance_customer-config" doc:id="0b7574ed-9ff1-4e91-9de4-32d819cbe2a5"/>
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="create_insurance_customer-console">
+        <http:listener config-ref="create_insurance_customer-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="create_insurance_customer-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\fetch-ins-customer:create_insurance_customer-config">
+        <logger level="INFO" doc:name="Logger" doc:id="65e2487a-7a02-4079-94bd-7108aa71a56b" message="output attributes are #[output application/json ---attributes]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="4fe6fc63-1237-4e4c-a2a5-786448c1be30" message="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	Client_Id: attributes.headers.'client-id',&#10;	Client_Secrete: attributes.headers.'client-secrete',&#10;	Custoemr_Id: attributes.queryParams.'customer-id'&#10;}]"/>
+		<set-variable value='#[attributes.queryParams."customer-id"]' doc:name="Set Variable" doc:id="78ee3cac-283f-4128-87cd-64cf97683dff" variableName="Queryid" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="aad52547-07d2-40ee-8545-b027d77f6f03" >
+			<route >
+				<file:read doc:name="Read" doc:id="817c8ea0-d769-4182-8ad9-78c923d9f71d" config-ref="File_Config" path="C:\Users\intel\OneDrive\Desktop\insurance\web application.csv" />
+				<ee:transform doc:name="Transform Message" doc:id="e556eda7-cad3-4415-aed3-1036124c6a62">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.CustomerID == vars.Queryid) default null]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</route>
+			<route >
+				<db:select doc:name="Select" doc:id="5918379f-9104-4c98-a47e-d6c6ea3b1c16" config-ref="Database_Config">
+					<db:sql ><![CDATA[select * from InsuranceCustomer where CustomerId=:id]]></db:sql>
+					<db:input-parameters ><![CDATA[#['id':vars.Queryid]]]></db:input-parameters>
+				</db:select>
+				<ee:transform doc:name="Transform Message" doc:id="df9859fa-5f98-4282-95df-12b58a83dae4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="6212aad2-aacd-4d12-8ae1-c1402ffc636e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="post:\create-ins-customer:application\json:create_insurance_customer-config" doc:id="d5dff4ce-8d41-4e4a-b255-788074d8c551">
+        <logger level="INFO" doc:name="Logger" doc:id="2b718b55-d32d-4592-bef7-7e81265278ce" message="output attributes are -&gt; #[output application/json --- attributes]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2665a4dc-2d16-4dc0-8650-5fc241930873" message="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	Client_Id: attributes.headers.'client-Id',&#10;	Client_Secrete: attributes.headers.'Client-secrete',&#10;	Application_Type: attributes.headers.&quot;Application-Type&quot;&#10;}]" />
+		<set-variable value='#[attributes.headers."Application-Type"]' doc:name="Set Variable" doc:id="d21d1dbf-a161-4511-85a0-6b956a1a99d2" variableName="id"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="cced78ee-dc23-4931-a174-916ccea52b3e" variableName="data"/>
+		<choice doc:name="Choice" doc:id="75bd3940-df99-42c6-b233-3820a618297e" >
+			<when expression="#[vars.id=='WebApplication']">
+				<ee:transform doc:name="Transform Message" doc:id="41e6aa05-b714-4e99-a30f-61a85d596a36">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	CustomerID: payload.CustomerID default "",
+	customerName: payload.customerName default "",
+	PolocyNo: payload.PolocyNo default "",
+	InsuranceType: payload.InsuranceType default "",
+	SubInsuranceType: payload.SubInsuranceType default "",
+	validation: payload.validation default "",
+	Address: payload.Address default "",
+	MobileNo: payload.MobileNo default "",
+	"EMail": payload."E-Mail" default "",
+	"InstallmentMode": payload."Installment Mode" default ""
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<db:insert doc:name="Insert" doc:id="58e75cc6-3906-4ac4-9f42-cfb36b399a47" config-ref="Database_Config">
+			<db:sql><![CDATA[insert into InsuranceCustomer(CustomerID,customerName,PolocyNo,InsuranceType,SubInsuranceType,validation,Address,MobileNo,EMail,InstallmentMode) values(:CustomerID,:customerName,:PolocyNo,:InsuranceType,:SubInsuranceType,:validation,:Address,:MobileNo,:EMail,:InstallmentMode)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	"CustomerID":payload.CustomerID,
+	"customerName": payload.customerName,
+	PolocyNo: payload.PolocyNo,
+	InsuranceType: payload.InsuranceType,
+	SubInsuranceType: payload.SubInsuranceType,
+	validation: payload.validation,
+	Address: payload.Address,
+	MobileNo: payload.MobileNo,
+	EMail: payload.EMail,
+	InstallmentMode: payload.InstallmentMode
+}]]]></db:input-parameters>
+		</db:insert>
+				<ee:transform doc:name="Transform Message" doc:id="940f723d-83b2-4f63-a6dd-b344d1b26d21">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  Code: "200",
+  Message: "Customer Created Successfully"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[vars.id=='MobileApplication']">
+				<ee:transform doc:name="Transform Message" doc:id="3622f191-0d34-4008-84d5-261ff088bc24">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/csv header = false
+---
+[{
+	CustomerID: payload.CustomerID default "",
+	customerName: payload.customerName default "",
+	PolocyNo: payload.PolocyNo default "",
+	InsuranceType: payload.InsuranceType default "",
+	SubInsuranceType: payload.SubInsuranceType default "",
+	validation: payload.validation default "",
+	Address: payload.Address default "",
+	MobileNo: payload.MobileNo default "",
+	"EMail": payload."E-Mail" default "",
+	"InstallmentMode": payload."Installment Mode" default ""
+}]
+	]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<file:write doc:name="Write" doc:id="e8901783-f133-4ede-aec8-9c56edc38d51" path="C:\Users\intel\OneDrive\Desktop\insurance\web application.csv" mode="APPEND" config-ref="File_Config" createParentDirectories="false" />
+				<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  Code: "200",
+  Message: "Customer Created Successfully"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Copy_of_Transform Message" doc:id="d0a21529-9eb8-44af-8b68-e59ca797ef10" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"Data doesn't belongs to any application, Please check"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+    </flow>
+</mule>

@@ -1,0 +1,13 @@
+
+{
+    "CustomerID": "12346",
+    "customerName": "RajKiran",
+    "PolocyNo": "14578957",
+    "InsuranceType": "General",
+    "SubInsuranceType": "Motor",
+    "validation": "1year",
+    "Address": "Hyd",
+    "MobileNo": "9949572656",
+    "E-Mail": "raj@nixt.com",
+    "Installment Mode": "Monthly"
+}
